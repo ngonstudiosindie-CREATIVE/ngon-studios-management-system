@@ -691,6 +691,154 @@
       margin-top: 8px;
     }
 
+  
+    .dashboard-task-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .personal-filter-bar,
+    .manager-filter-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: end;
+    }
+
+    .dashboard-stats {
+      margin-bottom: 18px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .profile-tile {
+      border: 1px solid var(--line);
+      background: #090909;
+      border-radius: 22px;
+      padding: 15px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .profile-tile:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .profile-tile:hover p,
+    .profile-tile:hover .profile-count-label {
+      color: #222;
+    }
+
+    .profile-tile-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      flex: 0 0 auto;
+    }
+
+    .profile-tile:hover .profile-avatar {
+      background: #000;
+      color: #fff;
+    }
+
+    .profile-tile h4 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .profile-tile p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      margin: 3px 0 0;
+      word-break: break-word;
+    }
+
+    .profile-count {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .profile-count strong {
+      font-size: 30px;
+      letter-spacing: -0.05em;
+    }
+
+    .profile-count-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .member-status-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(210px, 1fr));
+      gap: 14px;
+      overflow-x: auto;
+      margin-top: 18px;
+    }
+
+    .task-detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .task-open-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media(max-width: 920px) {
+      .personal-filter-bar,
+      .manager-filter-panel,
+      .task-detail-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .member-status-board {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+      }
+
+      .member-status-board .column {
+        min-width: 84vw;
+        scroll-snap-align: start;
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -777,6 +925,9 @@
 
     <div class="drawer-section-title">Common Tabs</div>
     <button type="button" class="drawerTab active" data-view="tasks">New Tasks <span id="drawerTaskCount">0</span></button>
+    <button type="button" class="drawerTab" data-view="myTodo">My To Do <span id="drawerMyTodoCount">0</span></button>
+    <button type="button" class="drawerTab" data-view="myCompleted">My Completed <span id="drawerMyCompletedCount">0</span></button>
+    <button type="button" class="drawerTab" data-view="personalDashboard">My Dashboard <span id="drawerMyDashboardCount">0</span></button>
     <button type="button" class="drawerTab" data-view="updates">Updates <span id="drawerUpdateCount">0</span></button>
     <button type="button" class="drawerTab" data-view="questions">Questions <span id="drawerQuestionCount">0</span></button>
     <button type="button" class="drawerTab" data-view="chat">Chatroom <span id="drawerChatCount">0</span></button>
@@ -802,6 +953,9 @@
       <div class="nav-title">Member Navigation</div>
       <nav class="nav">
         <button type="button" class="active navBtn" data-view="tasks">New Tasks <span id="taskCount">0</span></button>
+        <button type="button" class="navBtn" data-view="myTodo">My To Do <span id="myTodoCount">0</span></button>
+        <button type="button" class="navBtn" data-view="myCompleted">My Completed <span id="myCompletedCount">0</span></button>
+        <button type="button" class="navBtn" data-view="personalDashboard">My Dashboard <span id="myDashboardCount">0</span></button>
         <button type="button" class="navBtn" data-view="updates">Updates <span id="updateCount">0</span></button>
         <button type="button" class="navBtn" data-view="questions">Questions <span id="questionCount">0</span></button>
         <button type="button" class="navBtn" data-view="chat">Chatroom <span id="chatCount">0</span></button>
@@ -861,6 +1015,74 @@
           <div class="section-head"><h3>Snapshot</h3></div>
           <div class="stats"><div class="stat"><strong id="sTotal">0</strong><span>Total Tasks</span></div><div class="stat"><strong id="sActive">0</strong><span>Active</span></div><div class="stat"><strong id="sReview">0</strong><span>Need Review</span></div><div class="stat"><strong id="sOpen">0</strong><span>Open Questions</span></div></div>
           <div style="margin-top:16px"><div class="inline"><button type="button" class="primary" id="downloadMySheetsBtn">Download My Google Sheet</button><button type="button" class="ghost" id="downloadMyPdfBtn">Download My PDF</button></div><p class="compact">Members can download their own progress and updates as Google Sheets-friendly CSV or PDF.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    
+    <section id="myTodoView" class="view">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h3>My To Do</h3>
+            <p>All tasks assigned to you that are not completed yet.</p>
+          </div>
+        </div>
+        <div id="myTodoList" class="dashboard-task-grid"></div>
+      </section>
+    </section>
+
+    <section id="myCompletedView" class="view">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h3>My Completed Tasks</h3>
+            <p>Whenever you mark your task as completed, it appears here automatically.</p>
+          </div>
+        </div>
+        <div id="myCompletedList" class="dashboard-task-grid"></div>
+      </section>
+    </section>
+
+    <section id="personalDashboardView" class="view">
+      <div class="grid">
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <h3>My Personal Dashboard</h3>
+              <p>Your private dashboard. Other members cannot access this dashboard.</p>
+            </div>
+          </div>
+
+          <div class="personal-filter-bar">
+            <input id="personalSearch" class="search" placeholder="Filter my tasks, updates, projects...">
+            <select id="personalStatusFilter">
+              <option value="">All my statuses</option>
+              <option>To Do</option>
+              <option>In Progress</option>
+              <option>Needs Review</option>
+              <option>Completed</option>
+            </select>
+          </div>
+
+          <div class="stats dashboard-stats">
+            <div class="stat"><strong id="pdTotal">0</strong><span>My Tasks</span></div>
+            <div class="stat"><strong id="pdActive">0</strong><span>Not Completed</span></div>
+            <div class="stat"><strong id="pdCompleted">0</strong><span>Completed</span></div>
+            <div class="stat"><strong id="pdUpdates">0</strong><span>My Updates</span></div>
+          </div>
+
+          <div class="section-head" style="margin-top:22px">
+            <h3>My Filtered Tasks</h3>
+          </div>
+          <div id="personalTaskList" class="dashboard-task-grid"></div>
+        </section>
+
+        <aside class="section">
+          <div class="section-head">
+            <h3>My Updates</h3>
+          </div>
+          <div id="personalUpdatesList" class="list"></div>
         </aside>
       </div>
     </section>
@@ -979,9 +1201,88 @@
 
     <section id="controlView" class="view managerSection">
       <div class="grid">
-        <section class="section"><div class="section-head"><div><h3>Manager Control Room</h3><p>Monitor all tasks.</p></div><div class="inline"><button type="button" id="downloadAllSheetsBtn" class="primary">Download Google Sheet</button><button type="button" id="downloadAllPdfBtn" class="ghost">Download PDF</button><button type="button" id="exportBtn" class="ghost">Export JSON</button></div></div><div class="stats" style="grid-template-columns:repeat(4,minmax(120px,1fr));margin-bottom:20px"><div class="stat"><strong id="mTotal">0</strong><span>Total</span></div><div class="stat"><strong id="mProg">0</strong><span>In Progress</span></div><div class="stat"><strong id="mRev">0</strong><span>Review</span></div><div class="stat"><strong id="mComp">0</strong><span>Completed</span></div></div><div class="table-wrap"><table><thead><tr><th>Task</th><th>Member</th><th>Project</th><th>Status</th><th>Progress</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="managerTable"></tbody></table></div></section>
+        <section class="section"><div class="section-head"><div><h3>Manager Control Room</h3><p>Monitor all tasks and open each member dashboard.</p></div><div class="inline"><button type="button" id="downloadAllSheetsBtn" class="primary">Download Google Sheet</button><button type="button" id="downloadAllPdfBtn" class="ghost">Download PDF</button><button type="button" id="exportBtn" class="ghost">Export JSON</button></div></div>
+        <div class="manager-filter-panel">
+          <div class="field">
+            <label>Filter members by assigned tasks</label>
+            <select id="managerTaskFilter">
+              <option value="all">All members</option>
+              <option value="active">Currently assigned active tasks</option>
+              <option value="none">0 active tasks</option>
+              <option value="completed">Completed tasks</option>
+              <option value="todo">To Do tasks</option>
+              <option value="progress">In Progress tasks</option>
+              <option value="review">Needs Review tasks</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Search members / roles</label>
+            <input id="managerMemberSearch" placeholder="Search name, email, role, position...">
+          </div>
+        </div>
+        <div id="managerProfileGrid" class="profile-grid"></div>
+        <div class="stats" style="grid-template-columns:repeat(4,minmax(120px,1fr));margin-bottom:20px"><div class="stat"><strong id="mTotal">0</strong><span>Total</span></div><div class="stat"><strong id="mProg">0</strong><span>In Progress</span></div><div class="stat"><strong id="mRev">0</strong><span>Review</span></div><div class="stat"><strong id="mComp">0</strong><span>Completed</span></div></div><div class="table-wrap"><table><thead><tr><th>Task</th><th>Member</th><th>Project</th><th>Status</th><th>Progress</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="managerTable"></tbody></table></div></section>
         <aside class="section"><div class="section-head"><h3>Pending Questions</h3></div><div id="pendingQuestions" class="list"></div></aside>
       </div>
+    </section>
+
+    
+    <section id="memberDashboardView" class="view managerSection">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h3 id="memberDashboardTitle">Member Dashboard</h3>
+            <p id="memberDashboardSub">Tasks segregated by status and completed work.</p>
+          </div>
+          <button type="button" class="ghost" onclick="setView('control')">Back to Control Room</button>
+        </div>
+
+        <div class="stats dashboard-stats">
+          <div class="stat"><strong id="mdActive">0</strong><span>Active Assigned</span></div>
+          <div class="stat"><strong id="mdCompleted">0</strong><span>Completed</span></div>
+          <div class="stat"><strong id="mdUpdates">0</strong><span>Updates</span></div>
+          <div class="stat"><strong id="mdTotal">0</strong><span>Total Tasks</span></div>
+        </div>
+
+        <div class="member-status-board">
+          <div class="column"><div class="col-title">TO DO <span id="mdTodoCount" class="count">0</span></div><div id="mdTodoList"></div></div>
+          <div class="column"><div class="col-title">IN PROGRESS <span id="mdProgressCount" class="count">0</span></div><div id="mdProgressList"></div></div>
+          <div class="column"><div class="col-title">NEEDS REVIEW <span id="mdReviewCount" class="count">0</span></div><div id="mdReviewList"></div></div>
+          <div class="column"><div class="col-title">COMPLETED <span id="mdCompletedCount" class="count">0</span></div><div id="mdCompletedList"></div></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="taskDashboardView" class="view">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h3 id="taskDashboardTitle">Task Dashboard</h3>
+            <p id="taskDashboardSub">Task-specific timeline and progress details.</p>
+          </div>
+          <button type="button" class="ghost" onclick="backFromTaskDashboard()">Back</button>
+        </div>
+
+        <div class="stats dashboard-stats">
+          <div class="stat"><strong id="tdStart">-</strong><span>Start Date</span></div>
+          <div class="stat"><strong id="tdEnd">-</strong><span>End Date</span></div>
+          <div class="stat"><strong id="tdDays">0</strong><span>Days Passed</span></div>
+          <div class="stat"><strong id="tdStatus">-</strong><span>Status</span></div>
+        </div>
+
+        <div class="task-detail-layout">
+          <article class="card">
+            <h4>Task Info</h4>
+            <p id="taskDashboardDescription"></p>
+            <div id="taskDashboardMeta" class="meta"></div>
+          </article>
+
+          <article class="card">
+            <h4>Task Updates</h4>
+            <div id="taskDashboardUpdates" class="list"></div>
+          </article>
+        </div>
+      </section>
     </section>
 
     <section id="mQuestionsView" class="view managerSection"><section class="section"><div class="section-head"><h3>Manager Questions</h3></div><div id="managerQuestionsList" class="list"></div></section></section>
@@ -1046,6 +1347,9 @@ const SESSION_KEY = 'ngon_valid_until_24h';
 const SESSION_MS = 24 * 60 * 60 * 1000;
 let realtimeChannel = null;
 let currentView = 'tasks';
+let selectedMemberDashboardId = null;
+let selectedTaskDashboardId = null;
+let previousDashboardView = 'tasks';
 
 const POSITIONS = ['CO-FOUNDER','MANAGING DIRECTOR','2D-LEAD','2D ARTIST','3D-LEAD','3D ARTIST','VFX-LEAD','VIDEOGRAPHY AND EDITING','MUSIC','VOICE ARTIST'];
 const state = { user:null, profile:null, profiles:[], tasks:[], updates:[], questions:[], chats:[], announcements:[] };
@@ -1253,7 +1557,7 @@ function applyRole(){
 }
 
 function setView(view){
-  if(['control','assignTasks','mQuestions','mUpdates','mChat','users','resetData'].includes(view) && !isManager()) { toast('Manager area hidden for members'); view='tasks'; }
+  if(['control','assignTasks','memberDashboard','mQuestions','mUpdates','mChat','users','resetData'].includes(view) && !isManager()) { toast('Manager area hidden for members'); view='tasks'; }
   currentView=view;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.navBtn').forEach(b=>b.classList.remove('active'));
@@ -1262,11 +1566,16 @@ function setView(view){
   document.querySelectorAll(`[data-view="${view}"]`).forEach(b=>b.classList.add('active')); closeMobileDrawer();
   const titles = {
     tasks:['NGON STUDIOS MANAGEMENT SYSTEM','New Tasks tab: create tasks and view board.'],
+    myTodo:['NGON STUDIOS MY TO DO','Your assigned tasks that are not completed.'],
+    myCompleted:['NGON STUDIOS COMPLETED TASKS','Your completed tasks appear here automatically.'],
+    personalDashboard:['NGON STUDIOS PERSONAL DASHBOARD','Your private personal dashboard.'],
     updates:['NGON STUDIOS UPDATES','Record progress updates.'],
     questions:['NGON STUDIOS QUESTIONS','Raise questions and view replies.'],
     chat:['NGON STUDIOS CHATROOM','Common group chat for all members and managers.'],
     announcements:['NGON STUDIOS ANNOUNCEMENTS','Common announcement board for all members.'],
-    control:['NGON STUDIOS CONTROL ROOM','Manager area: monitor everything.'],
+    control:['NGON STUDIOS CONTROL ROOM','Manager area: monitor members and tasks.'],
+    memberDashboard:['NGON STUDIOS MEMBER DASHBOARD','Manager view of a selected member.'],
+    taskDashboard:['NGON STUDIOS TASK DASHBOARD','Task-specific progress dashboard.'],
     assignTasks:['NGON STUDIOS ASSIGN TASKS','Manager area: assign tasks to registered members.'],
     mQuestions:['NGON STUDIOS MANAGER QUESTIONS','Reply to member questions.'],
     mUpdates:['NGON STUDIOS MANAGER UPDATES','Review all updates.'],
@@ -1323,6 +1632,80 @@ function initials(name){ return String(name||'?').trim().split(/\s+/).slice(0,2)
 function optionsPosition(selected){ return '<option value="">Not Assigned</option>' + POSITIONS.map(p=>`<option value="${esc(p)}" ${p===selected?'selected':''}>${esc(p)}</option>`).join(''); }
 
 
+
+function taskOwnerProfile(t) {
+  return state.profiles.find(p =>
+    (t.assigned_to && p.id === t.assigned_to) ||
+    (t.assigned_member_email && p.email && p.email.toLowerCase() === t.assigned_member_email.toLowerCase()) ||
+    (t.member_name && p.name && p.name.toLowerCase() === t.member_name.toLowerCase())
+  ) || null;
+}
+
+function tasksForProfile(profile) {
+  if (!profile) return [];
+  const email = (profile.email || '').toLowerCase();
+  const name = (profile.name || '').toLowerCase();
+  return state.tasks.filter(t =>
+    t.assigned_to === profile.id ||
+    (t.assigned_member_email && t.assigned_member_email.toLowerCase() === email) ||
+    (t.member_name && t.member_name.toLowerCase() === name)
+  );
+}
+
+function myTasks() {
+  return tasksForProfile(state.profile);
+}
+
+function myActiveTasks() {
+  return myTasks().filter(t => t.status !== 'Completed');
+}
+
+function myCompletedTasks() {
+  return myTasks().filter(t => t.status === 'Completed');
+}
+
+function taskUpdates(taskId) {
+  return state.updates.filter(u => u.task_id === taskId);
+}
+
+function daysBetween(start, end = new Date()) {
+  if (!start) return 0;
+  const a = new Date(start);
+  const b = new Date(end);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 0;
+  return Math.max(0, Math.floor((b - a) / 86400000));
+}
+
+function shortDate(value) {
+  if (!value) return '-';
+  try { return new Date(value).toLocaleDateString(); } catch { return String(value); }
+}
+
+function canViewTaskDashboard(task) {
+  return isManager() || canEditTask(task);
+}
+
+function taskDashboardCard(t) {
+  const updates = taskUpdates(t.id);
+  const owner = taskOwnerProfile(t);
+  return `<article class="card">
+    <h4>${esc(t.title)}</h4>
+    <p>${esc(t.description || 'No description added.')}</p>
+    <div class="meta">
+      <span class="pill white">${esc(t.status)}</span>
+      <span class="pill">${esc(t.project)}</span>
+      <span class="pill">${esc(owner?.name || t.member_name || 'Unassigned')}</span>
+      <span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span>
+      <span class="pill">${t.progress || 0}%</span>
+      <span class="pill">${updates.length} updates</span>
+    </div>
+    <div class="task-open-row">
+      <span class="compact">Started ${shortDate(t.created_at)} · ${daysBetween(t.created_at)} days passed</span>
+      <button type="button" class="ghost" onclick="openTaskDashboard('${t.id}')">Open Dashboard</button>
+    </div>
+  </article>`;
+}
+
 function canEditTask(t) {
   if (isManager()) return true;
   const email = (state.profile?.email || '').toLowerCase();
@@ -1368,10 +1751,195 @@ function filteredTasks(){
 function taskCard(t){
   const edit = canEditTask(t) ? `<button onclick="editTask('${t.id}')">Edit</button>` : '';
   const del = isManager() ? `<button onclick="deleteTask('${t.id}')">Delete</button>` : '';
+  const open = (isManager() || canEditTask(t)) ? `<button onclick="openTaskDashboard('${t.id}')">Dashboard</button>` : '';
   const permission = canEditTask(t) ? 'Editable by you' : 'View only';
-  return `<article class="card"><h4>${esc(t.title)}</h4><p>${esc(t.description||'No description added.')}</p><div class="meta"><span class="pill white">${esc(t.member_name)}</span><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span><span class="pill">${esc(t.project)}</span><span class="pill">${esc(t.status)}</span><span class="pill">${esc(t.deadline||'No deadline')}</span><span class="pill">${t.progress||0}%</span><span class="pill">${permission}</span></div><div class="actions"><button onclick="quickQuestion('${t.id}')">Question</button>${edit}${del}</div></article>`;
+  return `<article class="card"><h4>${esc(t.title)}</h4><p>${esc(t.description||'No description added.')}</p><div class="meta"><span class="pill white">${esc(t.member_name)}</span><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span><span class="pill">${esc(t.project)}</span><span class="pill">${esc(t.status)}</span><span class="pill">${esc(t.deadline||'No deadline')}</span><span class="pill">${t.progress||0}%</span><span class="pill">${permission}</span></div><div class="actions"><button onclick="quickQuestion('${t.id}')">Question</button>${open}${edit}${del}</div></article>`;
 }
 
+
+
+function renderMyTodo() {
+  const list = $('myTodoList');
+  if (!list) return;
+  const arr = myActiveTasks();
+  list.innerHTML = arr.length ? arr.map(taskDashboardCard).join('') : '<div class="empty">No pending assigned tasks. Great work.</div>';
+}
+
+function renderMyCompleted() {
+  const list = $('myCompletedList');
+  if (!list) return;
+  const arr = myCompletedTasks();
+  list.innerHTML = arr.length ? arr.map(taskDashboardCard).join('') : '<div class="empty">No completed tasks yet.</div>';
+}
+
+function renderPersonalDashboard() {
+  if (!$('personalTaskList')) return;
+  const q = ($('personalSearch')?.value || '').trim().toLowerCase();
+  const status = $('personalStatusFilter')?.value || '';
+  const mine = myTasks();
+  const myIds = new Set(mine.map(t => t.id));
+  const myUpdates = state.updates.filter(u => myIds.has(u.task_id) || u.created_by === state.profile.id);
+
+  const filtered = mine.filter(t => {
+    const hay = [t.title,t.project,t.member_name,t.assigned_member_email,t.status,t.priority,t.description,t.deadline].map(v=>String(v||'').toLowerCase()).join(' ');
+    return (!q || hay.includes(q)) && (!status || t.status === status);
+  });
+
+  $('pdTotal').textContent = mine.length;
+  $('pdActive').textContent = mine.filter(t=>t.status !== 'Completed').length;
+  $('pdCompleted').textContent = mine.filter(t=>t.status === 'Completed').length;
+  $('pdUpdates').textContent = myUpdates.length;
+
+  $('personalTaskList').innerHTML = filtered.length ? filtered.map(taskDashboardCard).join('') : '<div class="empty">No personal tasks match this filter.</div>';
+
+  $('personalUpdatesList').innerHTML = myUpdates.length ? myUpdates.map(u => `<article class="card">
+    <h4>${esc(taskTitle(u.task_id))}</h4>
+    <p>${esc(u.note || 'Status/progress changed.')}</p>
+    <div class="meta"><span class="pill white">${esc(u.status)}</span><span class="pill">${u.progress ?? 0}%</span><span class="pill">${new Date(u.created_at).toLocaleString()}</span></div>
+  </article>`).join('') : '<div class="empty">No personal updates yet.</div>';
+}
+
+function memberTaskCountForFilter(profile, filter) {
+  const tasks = tasksForProfile(profile);
+  if (filter === 'active') return tasks.filter(t => t.status !== 'Completed').length;
+  if (filter === 'none') return tasks.filter(t => t.status !== 'Completed').length;
+  if (filter === 'completed') return tasks.filter(t => t.status === 'Completed').length;
+  if (filter === 'todo') return tasks.filter(t => t.status === 'To Do').length;
+  if (filter === 'progress') return tasks.filter(t => t.status === 'In Progress').length;
+  if (filter === 'review') return tasks.filter(t => t.status === 'Needs Review').length;
+  return tasks.length;
+}
+
+function renderManagerProfiles() {
+  const grid = $('managerProfileGrid');
+  if (!grid) return;
+
+  const filter = $('managerTaskFilter')?.value || 'all';
+  const q = ($('managerMemberSearch')?.value || '').trim().toLowerCase();
+
+  let profiles = memberProfiles().filter(p => {
+    const tasks = tasksForProfile(p);
+    const activeCount = tasks.filter(t => t.status !== 'Completed').length;
+    const displayCount = memberTaskCountForFilter(p, filter);
+    const hay = [p.name,p.email,p.role,p.position].map(v=>String(v||'').toLowerCase()).join(' ');
+
+    const filterMatch =
+      filter === 'all' ? true :
+      filter === 'none' ? activeCount === 0 :
+      displayCount > 0;
+
+    return filterMatch && (!q || hay.includes(q));
+  });
+
+  grid.innerHTML = profiles.length ? profiles.map(p => {
+    const activeCount = tasksForProfile(p).filter(t => t.status !== 'Completed').length;
+    const totalCount = tasksForProfile(p).length;
+    return `<article class="profile-tile" onclick="openMemberDashboard('${p.id}')">
+      <div class="profile-tile-head">
+        <div class="profile-avatar">${esc(initials(p.name))}</div>
+        <div>
+          <h4>${esc(p.name)}</h4>
+          <p>${esc(p.position || 'Not Assigned')} · ${esc(p.role)}</p>
+          <p>${esc(p.email)}</p>
+        </div>
+      </div>
+      <div class="profile-count"><strong>${activeCount}</strong><span class="profile-count-label">current assigned tasks</span></div>
+      <div class="compact">${totalCount} total tasks including completed</div>
+    </article>`;
+  }).join('') : '<div class="empty">No members match this filter.</div>';
+}
+
+function openMemberDashboard(profileId) {
+  if (!isManager()) return toast('Only managers can open member dashboards');
+  selectedMemberDashboardId = profileId;
+  setView('memberDashboard');
+}
+
+function renderMemberDashboard() {
+  if (!$('memberDashboardTitle')) return;
+  const p = state.profiles.find(x => x.id === selectedMemberDashboardId) || memberProfiles()[0];
+  if (!p) {
+    $('memberDashboardTitle').textContent = 'Member Dashboard';
+    $('memberDashboardSub').textContent = 'No member selected.';
+    return;
+  }
+  selectedMemberDashboardId = p.id;
+
+  const tasks = tasksForProfile(p);
+  const ids = new Set(tasks.map(t => t.id));
+  const updates = state.updates.filter(u => ids.has(u.task_id));
+
+  $('memberDashboardTitle').textContent = `${p.name} Dashboard`;
+  $('memberDashboardSub').textContent = `${p.position || 'Not Assigned'} · ${p.email}`;
+
+  $('mdActive').textContent = tasks.filter(t => t.status !== 'Completed').length;
+  $('mdCompleted').textContent = tasks.filter(t => t.status === 'Completed').length;
+  $('mdUpdates').textContent = updates.length;
+  $('mdTotal').textContent = tasks.length;
+
+  const map = [
+    ['To Do','mdTodoList','mdTodoCount'],
+    ['In Progress','mdProgressList','mdProgressCount'],
+    ['Needs Review','mdReviewList','mdReviewCount'],
+    ['Completed','mdCompletedList','mdCompletedCount']
+  ];
+
+  map.forEach(([status, listId, countId]) => {
+    const arr = tasks.filter(t => t.status === status);
+    $(countId).textContent = arr.length;
+    $(listId).innerHTML = arr.length ? arr.map(taskDashboardCard).join('') : '<div class="empty">No tasks here.</div>';
+  });
+}
+
+function openTaskDashboard(taskId) {
+  const t = state.tasks.find(x => x.id === taskId);
+  if (!t) return toast('Task not found');
+  if (!canViewTaskDashboard(t)) return toast('You can only open your own task dashboard');
+  previousDashboardView = currentView || 'tasks';
+  selectedTaskDashboardId = taskId;
+  setView('taskDashboard');
+}
+
+function backFromTaskDashboard() {
+  setView(previousDashboardView || (isManager() ? 'control' : 'personalDashboard'));
+}
+
+function renderTaskDashboard() {
+  if (!$('taskDashboardTitle')) return;
+  const t = state.tasks.find(x => x.id === selectedTaskDashboardId);
+  if (!t) {
+    $('taskDashboardTitle').textContent = 'Task Dashboard';
+    $('taskDashboardSub').textContent = 'No task selected.';
+    return;
+  }
+  const owner = taskOwnerProfile(t);
+  const updates = taskUpdates(t.id);
+  const completedUpdate = updates.find(u => u.status === 'Completed');
+  const endDate = completedUpdate?.created_at || t.deadline || '';
+  const days = daysBetween(t.created_at, t.status === 'Completed' && endDate ? endDate : new Date());
+
+  $('taskDashboardTitle').textContent = t.title;
+  $('taskDashboardSub').textContent = `${t.project || 'No project'} · ${owner?.name || t.member_name || 'Unassigned'}`;
+  $('tdStart').textContent = shortDate(t.created_at);
+  $('tdEnd').textContent = endDate ? shortDate(endDate) : 'Not Set';
+  $('tdDays').textContent = String(days);
+  $('tdStatus').textContent = t.status || '-';
+  $('taskDashboardDescription').textContent = t.description || 'No description added.';
+
+  $('taskDashboardMeta').innerHTML = `
+    <span class="pill white">${esc(t.status)}</span>
+    <span class="pill">${esc(t.progress || 0)}%</span>
+    <span class="pill">${esc(t.priority || 'Normal')}</span>
+    <span class="pill">Deadline: ${esc(t.deadline || 'Not set')}</span>
+    <span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span>
+  `;
+
+  $('taskDashboardUpdates').innerHTML = updates.length ? updates.map(u => `<article class="card">
+    <h4>${esc(profileName(u.created_by))}</h4>
+    <p>${esc(u.note || 'Status/progress changed.')}</p>
+    <div class="meta"><span class="pill white">${esc(u.status)}</span><span class="pill">${u.progress ?? 0}%</span><span class="pill">${new Date(u.created_at).toLocaleString()}</span></div>
+  </article>`).join('') : '<div class="empty">No updates for this task yet.</div>';
+}
 
 function renderResetPanel() {
   if (!$('resetTasksCount')) return;
@@ -1394,9 +1962,9 @@ function render(){
   const total=state.tasks.length, active=state.tasks.filter(t=>['To Do','In Progress'].includes(t.status)).length, rev=state.tasks.filter(t=>t.status==='Needs Review').length, comp=state.tasks.filter(t=>t.status==='Completed').length, prog=state.tasks.filter(t=>t.status==='In Progress').length, open=state.questions.filter(q=>!q.reply).length;
   $('sTotal').textContent=total; $('sActive').textContent=active; $('sReview').textContent=rev; $('sOpen').textContent=open;
   $('mTotal').textContent=total; $('mProg').textContent=prog; $('mRev').textContent=rev; $('mComp').textContent=comp;
-  $('taskCount').textContent=total; $('updateCount').textContent=state.updates.length; $('questionCount').textContent=state.questions.length; $('mUpdateCount').textContent=state.updates.length; $('mQuestionCount').textContent=state.questions.length; $('userCount').textContent=state.profiles.length;
+  $('taskCount').textContent=total; $('updateCount').textContent=state.updates.length; $('questionCount').textContent=state.questions.length; if($('myTodoCount')) $('myTodoCount').textContent=myActiveTasks().length; if($('myCompletedCount')) $('myCompletedCount').textContent=myCompletedTasks().length; if($('myDashboardCount')) $('myDashboardCount').textContent=myTasks().length; $('mUpdateCount').textContent=state.updates.length; $('mQuestionCount').textContent=state.questions.length; $('userCount').textContent=state.profiles.length;
   $('chatCount').textContent=state.chats.filter(c=>c.room==='common').length; $('mChatCount').textContent=state.chats.filter(c=>c.room==='manager').length; if($('announcementCount')) $('announcementCount').textContent=state.announcements.length;
-  renderUpdates(); renderQuestions(); renderManager(); renderUsers(); renderChats(); renderAnnouncements(); renderAssignTaskPanel(); renderResetPanel(); syncDrawerState();
+  renderUpdates(); renderQuestions(); renderManager(); renderUsers(); renderChats(); renderAnnouncements(); renderAssignTaskPanel(); renderMyTodo(); renderMyCompleted(); renderPersonalDashboard(); renderManagerProfiles(); renderMemberDashboard(); renderTaskDashboard(); renderResetPanel(); syncDrawerState();
 }
 
 function renderUpdates(){
@@ -1413,7 +1981,7 @@ function renderQuestions(){
 }
 
 function renderManager(){
-  $('managerTable').innerHTML=state.tasks.length?state.tasks.map(t=>`<tr><td><strong>${esc(t.title)}</strong><div class="compact">${esc(t.description||'')}</div></td><td>${esc(t.member_name)}<br><span class="compact">${esc(t.assigned_member_email||'')}</span><br><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span></td><td>${esc(t.project)}</td><td><span class="pill white">${esc(t.status)}</span></td><td><div class="bar"><div class="fill" style="width:${clamp(t.progress)}%"></div></div><div class="compact">${clamp(t.progress)}%</div></td><td>${esc(t.deadline||'No deadline')}</td><td><div class="inline"><button class="ghost" onclick="editTask('${t.id}')">Edit</button><button class="danger" onclick="deleteTask('${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No tasks found.</div></td></tr>';
+  $('managerTable').innerHTML=state.tasks.length?state.tasks.map(t=>`<tr><td><strong>${esc(t.title)}</strong><div class="compact">${esc(t.description||'')}</div></td><td>${esc(t.member_name)}<br><span class="compact">${esc(t.assigned_member_email||'')}</span><br><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span></td><td>${esc(t.project)}</td><td><span class="pill white">${esc(t.status)}</span></td><td><div class="bar"><div class="fill" style="width:${clamp(t.progress)}%"></div></div><div class="compact">${clamp(t.progress)}%</div></td><td>${esc(t.deadline||'No deadline')}</td><td><div class="inline"><button class="ghost" onclick="openTaskDashboard('${t.id}')">Dashboard</button><button class="ghost" onclick="editTask('${t.id}')">Edit</button><button class="danger" onclick="deleteTask('${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No tasks found.</div></td></tr>';
 }
 
 function renderUsers(){
@@ -1930,6 +2498,9 @@ function syncDrawerState() {
 
   const map = [
     ['drawerTaskCount', state.tasks.length],
+    ['drawerMyTodoCount', myActiveTasks().length],
+    ['drawerMyCompletedCount', myCompletedTasks().length],
+    ['drawerMyDashboardCount', myTasks().length],
     ['drawerUpdateCount', state.updates.length],
     ['drawerQuestionCount', state.questions.length],
     ['drawerChatCount', state.chats.filter(c => c.room === 'common').length],
@@ -1949,7 +2520,7 @@ function bindEvents(){
   $('registerForm').onsubmit=registerUser; $('loginForm').onsubmit=loginUser; $('logoutBtn').onclick=logout; $('taskForm').onsubmit=saveTask; $('createTaskBtn').onclick=saveTask; $('updateForm').onsubmit=saveUpdate; $('questionForm').onsubmit=saveQuestion; $('replyForm').onsubmit=saveReply; $('closeReply').onclick=closeReply;
   $('chatForm').onsubmit=e=>{e.preventDefault();sendChat('common',$('chatText').value)}; $('mChatForm').onsubmit=e=>{e.preventDefault();sendChat('manager',$('mChatText').value)}; if($('assignTaskForm')) $('assignTaskForm').onsubmit=assignTaskToMember; if($('announcementForm')) $('announcementForm').onsubmit=postAnnouncement;
   if($('enableNotificationsBtn')) $('enableNotificationsBtn').onclick=requestBrowserNotifications; if($('downloadMySheetsBtn')) $('downloadMySheetsBtn').onclick=downloadMyGoogleSheet; if($('downloadMyPdfBtn')) $('downloadMyPdfBtn').onclick=downloadMyPdf; if($('downloadAllSheetsBtn')) $('downloadAllSheetsBtn').onclick=downloadAllGoogleSheet; if($('downloadAllPdfBtn')) $('downloadAllPdfBtn').onclick=downloadAllPdf; $('exportBtn').onclick=exportJSON; if($('resetDataTabBtn')) $('resetDataTabBtn').onclick=resetData;
-  ['search','memberFilter','statusFilter'].forEach(id=>$(id).addEventListener('input',render));
+  ['search','memberFilter','statusFilter'].forEach(id=>$(id).addEventListener('input',render)); ['personalSearch','personalStatusFilter','managerTaskFilter','managerMemberSearch'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('input',render); if(el) el.addEventListener('change',render); });
 }
 sb.auth.onAuthStateChange((event,session)=>{ if(session?.user && (event==='SIGNED_IN'||event==='TOKEN_REFRESHED')) set24h(); });
 bindEvents(); document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMobileDrawer(); });
