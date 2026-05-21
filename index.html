@@ -839,6 +839,23 @@
       }
     }
 
+  
+    .assignment-tag {
+      font-weight: 900;
+    }
+
+    .assignment-tag.self {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+    }
+
+    .assignment-tag.manager {
+      background: #1f1f1f;
+      color: #ffffff;
+      border-color: #5a5a5a;
+    }
+
   </style>
 </head>
 <body>
@@ -1633,23 +1650,78 @@ function optionsPosition(selected){ return '<option value="">Not Assigned</optio
 
 
 
-function taskOwnerProfile(t) {
-  return state.profiles.find(p =>
-    (t.assigned_to && p.id === t.assigned_to) ||
-    (t.assigned_member_email && p.email && p.email.toLowerCase() === t.assigned_member_email.toLowerCase()) ||
-    (t.member_name && p.name && p.name.toLowerCase() === t.member_name.toLowerCase())
-  ) || null;
-}
+function taskAssigneeMatchesProfile(t, profile) {
+  if (!t || !profile) return false;
 
-function tasksForProfile(profile) {
-  if (!profile) return [];
   const email = (profile.email || '').toLowerCase();
   const name = (profile.name || '').toLowerCase();
-  return state.tasks.filter(t =>
+
+  return (
     t.assigned_to === profile.id ||
     (t.assigned_member_email && t.assigned_member_email.toLowerCase() === email) ||
     (t.member_name && t.member_name.toLowerCase() === name)
   );
+}
+
+function taskOwnerProfile(t) {
+  if (!t) return null;
+
+  const assigned = state.profiles.find(p => taskAssigneeMatchesProfile(t, p));
+  if (assigned) return assigned;
+
+  const creator = state.profiles.find(p => p.id === t.created_by);
+  return creator || null;
+}
+
+function taskCreatorProfile(t) {
+  return state.profiles.find(p => p.id === t.created_by) || null;
+}
+
+function isSelfAssignedTask(t, profile = taskOwnerProfile(t)) {
+  if (!t || !profile) return false;
+
+  return (
+    t.created_by === profile.id &&
+    (
+      !t.assigned_to ||
+      t.assigned_to === profile.id
+    ) &&
+    (
+      !t.assigned_member_email ||
+      t.assigned_member_email.toLowerCase() === (profile.email || '').toLowerCase()
+    )
+  );
+}
+
+function isManagerAssignedTask(t) {
+  const creator = taskCreatorProfile(t);
+  return creator?.role === 'manager' && !isSelfAssignedTask(t);
+}
+
+function taskAssignmentLabel(t) {
+  if (isSelfAssignedTask(t)) return 'Self Assigned';
+  if (isManagerAssignedTask(t)) return 'Assigned by Manager';
+  return 'Assigned';
+}
+
+function taskAssignmentTagClass(t) {
+  if (isSelfAssignedTask(t)) return 'self';
+  if (isManagerAssignedTask(t)) return 'manager';
+  return '';
+}
+
+function taskAssignmentPill(t) {
+  return `<span class="pill assignment-tag ${taskAssignmentTagClass(t)}">${esc(taskAssignmentLabel(t))}</span>`;
+}
+
+function tasksForProfile(profile) {
+  if (!profile) return [];
+
+  return state.tasks.filter(t => {
+    const assignedToThisProfile = taskAssigneeMatchesProfile(t, profile);
+    const selfCreatedByThisProfile = t.created_by === profile.id;
+    return assignedToThisProfile || selfCreatedByThisProfile;
+  });
 }
 
 function myTasks() {
@@ -1693,6 +1765,7 @@ function taskDashboardCard(t) {
     <p>${esc(t.description || 'No description added.')}</p>
     <div class="meta">
       <span class="pill white">${esc(t.status)}</span>
+      ${taskAssignmentPill(t)}
       <span class="pill">${esc(t.project)}</span>
       <span class="pill">${esc(owner?.name || t.member_name || 'Unassigned')}</span>
       <span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span>
@@ -1708,14 +1781,7 @@ function taskDashboardCard(t) {
 
 function canEditTask(t) {
   if (isManager()) return true;
-  const email = (state.profile?.email || '').toLowerCase();
-  const name = (state.profile?.name || '').toLowerCase();
-  return (
-    t.created_by === state.profile?.id ||
-    t.assigned_to === state.profile?.id ||
-    (t.assigned_member_email && t.assigned_member_email.toLowerCase() === email) ||
-    (t.member_name && t.member_name.toLowerCase() === name)
-  );
+  return taskAssigneeMatchesProfile(t, state.profile) || t.created_by === state.profile?.id;
 }
 
 function memberProfiles() {
@@ -1740,6 +1806,7 @@ function filteredTasks(){
       t.description,
       t.deadline,
       pos,
+      taskAssignmentLabel(t),
       assignedProfile?.role,
       assignedProfile?.email,
       assignedProfile?.name
@@ -1753,7 +1820,8 @@ function taskCard(t){
   const del = isManager() ? `<button onclick="deleteTask('${t.id}')">Delete</button>` : '';
   const open = (isManager() || canEditTask(t)) ? `<button onclick="openTaskDashboard('${t.id}')">Dashboard</button>` : '';
   const permission = canEditTask(t) ? 'Editable by you' : 'View only';
-  return `<article class="card"><h4>${esc(t.title)}</h4><p>${esc(t.description||'No description added.')}</p><div class="meta"><span class="pill white">${esc(t.member_name)}</span><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span><span class="pill">${esc(t.project)}</span><span class="pill">${esc(t.status)}</span><span class="pill">${esc(t.deadline||'No deadline')}</span><span class="pill">${t.progress||0}%</span><span class="pill">${permission}</span></div><div class="actions"><button onclick="quickQuestion('${t.id}')">Question</button>${open}${edit}${del}</div></article>`;
+  const owner = taskOwnerProfile(t);
+  return `<article class="card"><h4>${esc(t.title)}</h4><p>${esc(t.description||'No description added.')}</p><div class="meta"><span class="pill white">${esc(owner?.name || t.member_name || 'Unassigned')}</span>${taskAssignmentPill(t)}<span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span><span class="pill">${esc(t.project)}</span><span class="pill">${esc(t.status)}</span><span class="pill">${esc(t.deadline||'No deadline')}</span><span class="pill">${t.progress||0}%</span><span class="pill">${permission}</span></div><div class="actions"><button onclick="quickQuestion('${t.id}')">Question</button>${open}${edit}${del}</div></article>`;
 }
 
 
@@ -1981,7 +2049,7 @@ function renderQuestions(){
 }
 
 function renderManager(){
-  $('managerTable').innerHTML=state.tasks.length?state.tasks.map(t=>`<tr><td><strong>${esc(t.title)}</strong><div class="compact">${esc(t.description||'')}</div></td><td>${esc(t.member_name)}<br><span class="compact">${esc(t.assigned_member_email||'')}</span><br><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span></td><td>${esc(t.project)}</td><td><span class="pill white">${esc(t.status)}</span></td><td><div class="bar"><div class="fill" style="width:${clamp(t.progress)}%"></div></div><div class="compact">${clamp(t.progress)}%</div></td><td>${esc(t.deadline||'No deadline')}</td><td><div class="inline"><button class="ghost" onclick="openTaskDashboard('${t.id}')">Dashboard</button><button class="ghost" onclick="editTask('${t.id}')">Edit</button><button class="danger" onclick="deleteTask('${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No tasks found.</div></td></tr>';
+  $('managerTable').innerHTML=state.tasks.length?state.tasks.map(t=>`<tr><td><strong>${esc(t.title)}</strong><div class="compact">${esc(t.description||'')}</div></td><td>${esc(taskOwnerProfile(t)?.name || t.member_name)}<br><span class="compact">${esc(t.assigned_member_email||taskOwnerProfile(t)?.email||'')}</span><br>${taskAssignmentPill(t)}<br><span class="pill">${esc(memberPosition(t.member_name,t.assigned_member_email))}</span></td><td>${esc(t.project)}</td><td><span class="pill white">${esc(t.status)}</span></td><td><div class="bar"><div class="fill" style="width:${clamp(t.progress)}%"></div></div><div class="compact">${clamp(t.progress)}%</div></td><td>${esc(t.deadline||'No deadline')}</td><td><div class="inline"><button class="ghost" onclick="openTaskDashboard('${t.id}')">Dashboard</button><button class="ghost" onclick="editTask('${t.id}')">Edit</button><button class="danger" onclick="deleteTask('${t.id}')">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty">No tasks found.</div></td></tr>';
 }
 
 function renderUsers(){
@@ -1994,6 +2062,18 @@ function renderChats(){
 }
 
 async function findAssigned(email){ if(!email) return null; return state.profiles.find(p=>p.email?.toLowerCase()===email.toLowerCase())?.id || null; }
+
+async function resolveAssignedUser(email, memberName){
+  const byEmail = await findAssigned(email);
+  if(byEmail) return byEmail;
+  const name = (memberName || '').trim().toLowerCase();
+  if(name) {
+    const byName = state.profiles.find(p => p.name && p.name.toLowerCase() === name);
+    if(byName) return byName.id;
+  }
+  if(state.profile && name && state.profile.name.toLowerCase() === name) return state.profile.id;
+  return null;
+}
 
 
 function renderAssignTaskPanel() {
@@ -2100,7 +2180,7 @@ async function deleteAnnouncement(id) {
 async function saveTask(e){
   e?.preventDefault();
   const id=$('editTaskId').value, email=$('taskMemberEmail').value.trim();
-  const payload={ title:$('taskTitle').value.trim(), project:$('taskProject').value.trim(), member_name:$('taskMember').value.trim(), assigned_member_email:email||null, assigned_to:await findAssigned(email), deadline:$('taskDeadline').value||null, status:$('taskStatus').value, priority:$('taskPriority').value, progress:clamp($('taskProgress').value), description:$('taskDescription').value.trim(), created_by:state.profile.id, updated_at:new Date().toISOString() };
+  const payload={ title:$('taskTitle').value.trim(), project:$('taskProject').value.trim(), member_name:$('taskMember').value.trim(), assigned_member_email:email||null, assigned_to:await resolveAssignedUser(email, $('taskMember').value.trim()), deadline:$('taskDeadline').value||null, status:$('taskStatus').value, priority:$('taskPriority').value, progress:clamp($('taskProgress').value), description:$('taskDescription').value.trim(), created_by:state.profile.id, updated_at:new Date().toISOString() };
   if(!payload.title || !payload.project || !payload.member_name) return toast('Fill title, project, and member');
   if(payload.status==='Completed') payload.progress=100;
   if(id){ const existing = state.tasks.find(t=>t.id===id); if(existing && !canEditTask(existing)) return toast('You can only edit your own assigned tasks'); }
@@ -2171,6 +2251,7 @@ function buildProgressRows(tasks,updates){
       'Member Name':t.member_name||'',
       'Member Email':t.assigned_member_email||'',
       'Role / Position':memberPosition(t.member_name,t.assigned_member_email),
+      'Assignment Type':taskAssignmentLabel(t),
       'Task Status':t.status||'',
       'Task Progress %':t.progress??0,
       'Priority':t.priority||'',
