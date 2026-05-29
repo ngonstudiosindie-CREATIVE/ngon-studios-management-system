@@ -856,6 +856,42 @@
       border-color: #5a5a5a;
     }
 
+  
+    .announcement-shell{display:grid;grid-template-rows:auto auto auto minmax(420px,1fr);gap:14px;min-height:min(760px,calc(100vh - 170px))}
+    .announcement-composer{background:#070707;border:1px solid var(--line);border-radius:24px;padding:14px;display:grid;grid-template-columns:minmax(220px,.45fr) minmax(260px,1fr) auto;gap:12px;align-items:end}
+    .announcement-composer input,.announcement-composer textarea{border-radius:18px;min-height:52px}
+    .announcement-composer textarea{min-height:52px;max-height:140px;resize:vertical}
+    .announcement-view-note{border:1px dashed #333;background:#070707;color:#777;border-radius:18px;padding:12px 14px;font-size:13px;line-height:1.45}
+    .announcement-view-note.hidden{display:none}
+    .announcement-feed{background:radial-gradient(circle at top left,rgba(255,255,255,.035),transparent 28%),#050505;border:1px solid var(--line);border-radius:24px;padding:18px;overflow-y:auto;min-height:420px;scroll-behavior:smooth}
+    .announcement-message{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+    .announcement-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#000;font-weight:950;font-size:12px;flex:0 0 auto}
+    .announcement-bubble{background:#111;border:1px solid #2d2d2d;border-radius:20px 20px 20px 6px;padding:13px 14px;max-width:min(820px,92%);box-shadow:0 12px 28px rgba(0,0,0,.28)}
+    .announcement-bubble h4{font-size:15px;margin-bottom:7px;letter-spacing:-.02em}
+    .announcement-bubble p{color:var(--muted);font-size:14px;line-height:1.55;white-space:pre-wrap;margin-bottom:10px}
+    .announcement-bubble small{color:#777;font-size:11px;display:block}
+    .chat-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+    @media(max-width:920px){
+      .announcement-shell{min-height:calc(100vh - 230px);grid-template-rows:auto auto auto minmax(320px,1fr)}
+      .announcement-composer{grid-template-columns:1fr;border-radius:18px;padding:10px}
+      .announcement-feed{border-radius:18px;padding:12px;min-height:320px}
+      .announcement-avatar{width:32px;height:32px;font-size:10px}
+      .announcement-bubble{max-width:88%;padding:11px 12px}
+      .chat-head-actions{justify-content:flex-start}
+    }
+
+  
+    .security-note {
+      border: 1px solid var(--line);
+      background: #080808;
+      border-radius: 18px;
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
   </style>
 </head>
 <body>
@@ -895,6 +931,11 @@
         <div class="field"><label>Name *</label><input id="regName" required placeholder="Full name"></div>
         <div class="field"><label>Email *</label><input id="regEmail" type="email" required placeholder="Email address"></div>
         <div class="field full"><label id="regPassLabel">Password *</label><input id="regPassword" type="password" required placeholder="Create password"></div>
+        <div class="field full hidden" id="managerPasscodeWrap">
+          <label>Manager Special Passcode *</label>
+          <input id="managerPasscode" type="password" placeholder="Enter private manager passcode">
+          <p class="compact">Only people with the private NGON manager passcode can register as managers.</p>
+        </div>
         <div class="field full"><button class="primary" type="submit">Save Registration</button></div>
       </form>
     </div>
@@ -1120,45 +1161,33 @@
 
     
     <section id="announcementsView" class="view">
-      <div class="grid">
-        <section class="section">
-          <div class="section-head">
+      <section class="section">
+        <div class="announcement-shell">
+          <div class="chat-head">
             <div>
               <h3>Announcements</h3>
               <p>Common announcement board. Managers can post announcements; members can only view them.</p>
             </div>
+            <span id="announcementBadge" class="chat-badge">0 announcements</span>
           </div>
 
-          <form id="announcementForm" class="form managerOnly hidden">
-            <div class="field full">
-              <label>Announcement Title *</label>
-              <input id="announcementTitle" required placeholder="Example: Production meeting tomorrow">
-            </div>
-            <div class="field full">
-              <label>Announcement Message *</label>
-              <textarea id="announcementMessage" required placeholder="Write announcement for all members..."></textarea>
-            </div>
-            <div class="field full">
-              <button class="primary" type="submit">Post Announcement</button>
-            </div>
+          <form id="announcementForm" class="announcement-composer managerOnly hidden">
+            <input id="announcementTitle" required placeholder="Announcement title...">
+            <textarea id="announcementMessage" required placeholder="Write announcement for all members..."></textarea>
+            <button class="primary" type="submit">Post Announcement</button>
           </form>
 
-          <div id="memberAnnouncementNote" class="empty">
-            Members can view announcements here. Only managers can post new announcements.
+          <div id="memberAnnouncementNote" class="announcement-view-note">
+            Members can only view announcements here. New announcements will appear in this feed.
           </div>
-        </section>
 
-        <aside class="section">
-          <div class="section-head">
-            <h3>Latest Announcements</h3>
-          </div>
-          <div id="announcementsList" class="list"></div>
-        </aside>
-      </div>
+          <div id="announcementsList" class="announcement-feed"></div>
+        </div>
+      </section>
     </section>
 
     <section id="chatView" class="view">
-      <section class="section"><div class="chat-shell"><div class="chat-head"><div><h3>Common Chatroom</h3><p>Group chat for all members and managers.</p></div><span id="chatBadge" class="chat-badge">0 messages</span></div><div id="chatList" class="chat-window"></div><form id="chatForm" class="chat-composer"><textarea id="chatText" required placeholder="Message everyone..."></textarea><button class="primary" type="submit">Send</button></form></div></section>
+      <section class="section"><div class="chat-shell"><div class="chat-head"><div><h3>Common Chatroom</h3><p>Group chat for all members and managers.</p></div><div class="chat-head-actions"><span id="chatBadge" class="chat-badge">0 messages</span><button type="button" id="clearCommonChatBtn" class="danger managerOnly hidden">Clear Chat</button></div></div><div id="chatList" class="chat-window"></div><form id="chatForm" class="chat-composer"><textarea id="chatText" required placeholder="Message everyone..."></textarea><button class="primary" type="submit">Send</button></form></div></section>
     </section>
 
     
@@ -1304,7 +1333,7 @@
 
     <section id="mQuestionsView" class="view managerSection"><section class="section"><div class="section-head"><h3>Manager Questions</h3></div><div id="managerQuestionsList" class="list"></div></section></section>
     <section id="mUpdatesView" class="view managerSection"><section class="section"><div class="section-head"><h3>Manager Updates</h3></div><div id="managerUpdatesList" class="list"></div></section></section>
-    <section id="mChatView" class="view managerSection"><section class="section"><div class="chat-shell"><div class="chat-head"><div><h3>Manager Chatroom</h3><p>Private chat only for managers.</p></div><span id="mChatBadge" class="chat-badge">0 messages</span></div><div id="mChatList" class="chat-window"></div><form id="mChatForm" class="chat-composer"><textarea id="mChatText" required placeholder="Message managers only..."></textarea><button class="primary" type="submit">Send</button></form></div></section></section>
+    <section id="mChatView" class="view managerSection"><section class="section"><div class="chat-shell"><div class="chat-head"><div><h3>Manager Chatroom</h3><p>Private chat only for managers.</p></div><div class="chat-head-actions"><span id="mChatBadge" class="chat-badge">0 messages</span><button type="button" id="clearManagerChatBtn" class="danger managerOnly hidden">Clear Chat</button></div></div><div id="mChatList" class="chat-window"></div><form id="mChatForm" class="chat-composer"><textarea id="mChatText" required placeholder="Message managers only..."></textarea><button class="primary" type="submit">Send</button></form></div></section></section>
     <section id="usersView" class="view managerSection"><section class="section"><div class="section-head"><h3>Registered Users</h3></div><div id="usersList" class="list"></div></section></section>
 
     <section id="resetDataView" class="view managerSection">
@@ -1510,18 +1539,57 @@ function valid24h(){ return Number(localStorage.getItem(SESSION_KEY) || 0) > Dat
 function clear24h(){ localStorage.removeItem(SESSION_KEY); }
 function showPanel(id){ ['authHome','registerChoice','loginChoice','registerPanel','loginPanel'].forEach(x=>{ if(x==='authHome') $(x).style.display='none'; else $(x).classList.remove('active'); }); $(id).classList.add('active'); }
 function showHome(){ ['registerChoice','loginChoice','registerPanel','loginPanel'].forEach(x=>$(x).classList.remove('active')); $('authHome').style.display='grid'; }
-function showRegister(role){ showPanel('registerPanel'); $('registerForm').reset(); $('regRole').value=role; const m=role==='manager'; $('regTitle').textContent=m?'Register as Manager':'Register as Member'; $('regSub').textContent=m?'Name, email, and manager password.':'Name, email, and member password.'; $('regPassLabel').textContent=m?'Manager Password *':'Member Password *'; }
+function showRegister(role){
+  showPanel('registerPanel');
+  $('registerForm').reset();
+  $('regRole').value=role;
+  const m=role==='manager';
+  $('regTitle').textContent=m?'Register as Manager':'Register as Member';
+  $('regSub').textContent=m?'Name, email, manager password, and special passcode.':'Name, email, and member password.';
+  $('regPassLabel').textContent=m?'Manager Password *':'Member Password *';
+
+  const wrap = $('managerPasscodeWrap');
+  const input = $('managerPasscode');
+  if (wrap) wrap.classList.toggle('hidden', !m);
+  if (input) input.required = m;
+}
 function showLogin(role){ showPanel('loginPanel'); $('loginForm').reset(); $('loginRole').value=role; const m=role==='manager'; $('loginTitle').textContent=m?'Login as Manager':'Login as Member'; $('loginSub').textContent=m?'Enter manager credentials.':'Enter member credentials.'; $('loginPassLabel').textContent=m?'Manager Password *':'Member Password *'; }
 
 async function registerUser(e){
   e.preventDefault();
-  const role=$('regRole').value, name=$('regName').value.trim(), email=$('regEmail').value.trim(), password=$('regPassword').value;
+
+  const role=$('regRole').value;
+  const name=$('regName').value.trim();
+  const email=$('regEmail').value.trim();
+  const password=$('regPassword').value;
+
   if(!name || !email || !password || !role) return toast('Fill all fields');
+
+  if(role === 'manager') {
+    const passcode = $('managerPasscode') ? $('managerPasscode').value.trim() : '';
+    if(!passcode) return toast('Enter manager special passcode');
+
+    const { data: passcodeOk, error: passcodeError } = await sb.rpc('verify_manager_passcode', {
+      input_passcode: passcode
+    });
+
+    if(passcodeError) {
+      console.warn(passcodeError);
+      return toast('Manager passcode check failed. Run updated SQL setup first.');
+    }
+
+    if(!passcodeOk) {
+      return toast('Wrong manager passcode');
+    }
+  }
+
   const { error } = await sb.auth.signUp({ email, password, options: { data: { name, role } } });
   if(error) return toast(error.message);
+
   toast('Registered. Now login.');
   showLogin(role);
-  $('loginName').value=name; $('loginEmail').value=email;
+  $('loginName').value=name;
+  $('loginEmail').value=email;
 }
 
 async function loginUser(e){
@@ -2177,16 +2245,27 @@ function renderAnnouncements() {
   const note = $('memberAnnouncementNote');
   if (note) note.classList.toggle('hidden', isManager());
 
-  list.innerHTML = state.announcements.length
-    ? state.announcements.map(a => `
-      <article class="announcement-card">
-        <h4>${esc(a.title)}</h4>
-        <p>${esc(a.message)}</p>
-        <small>Posted by ${esc(profileName(a.created_by))} · ${new Date(a.created_at).toLocaleString()}</small>
-        ${isManager() ? `<div class="actions" style="margin-top:12px"><button onclick="deleteAnnouncement('${a.id}')">Delete</button></div>` : ''}
-      </article>
+  if ($('announcementBadge')) {
+    $('announcementBadge').textContent = `${state.announcements.length} announcement${state.announcements.length === 1 ? '' : 's'}`;
+  }
+
+  const sorted = state.announcements.slice().reverse();
+
+  list.innerHTML = sorted.length
+    ? sorted.map(a => `
+      <div class="announcement-message">
+        <div class="announcement-avatar">${esc(initials(profileName(a.created_by)))}</div>
+        <article class="announcement-bubble">
+          <h4>${esc(a.title)}</h4>
+          <p>${esc(a.message)}</p>
+          <small>Posted by ${esc(profileName(a.created_by))} · ${new Date(a.created_at).toLocaleString()}</small>
+          ${isManager() ? `<div class="actions" style="margin-top:12px"><button onclick="deleteAnnouncement('${a.id}')">Delete</button></div>` : ''}
+        </article>
+      </div>
     `).join('')
     : '<div class="empty">No announcements yet.</div>';
+
+  list.scrollTop = list.scrollHeight;
 }
 
 async function postAnnouncement(e) {
@@ -2249,6 +2328,19 @@ async function saveReply(e){ e.preventDefault(); const id=$('replyId').value; co
 async function deleteQuestion(id){ if(!isManager())return; if(!confirm('Delete question?'))return; const {error}=await sb.from('questions').delete().eq('id',id); if(error)return toast(error.message); await loadAll(); }
 async function deleteUpdate(id){ if(!isManager())return; if(!confirm('Delete update?'))return; const {error}=await sb.from('updates').delete().eq('id',id); if(error)return toast(error.message); await loadAll(); }
 async function sendChat(room,text){ if(room==='manager'&&!isManager())return toast('Only managers'); const msg=text.trim(); if(!msg)return; const {error}=await sb.from('chat_messages').insert({room,message:msg,created_by:state.profile.id}); if(error)return toast(error.message); if(room==='common')$('chatText').value=''; else $('mChatText').value=''; await loadAll(); }
+async function clearChatRoom(room) {
+  if (!isManager()) return toast('Only managers can clear chats');
+
+  const roomLabel = room === 'manager' ? 'manager chatroom' : 'common chatroom';
+  if (!confirm(`Clear all messages in the ${roomLabel}? This cannot be undone.`)) return;
+
+  const { error } = await sb.from('chat_messages').delete().eq('room', room);
+  if (error) return toast(error.message);
+
+  await loadAll();
+  toast(room === 'manager' ? 'Manager chat cleared' : 'Common chat cleared');
+}
+
 async function deleteChat(id){ if(!isManager())return; if(!confirm('Delete message?'))return; const {error}=await sb.from('chat_messages').delete().eq('id',id); if(error)return toast(error.message); await loadAll(); }
 async function updatePosition(id){ if(!isManager())return toast('Only managers can assign roles'); const val=$('pos_'+id).value || null; const {error}=await sb.from('profiles').update({position:val}).eq('id',id); if(error)return toast(error.message); await loadAll(); toast('Role updated'); }
 
@@ -2648,7 +2740,7 @@ function bindEvents(){
   document.querySelectorAll('.regRoleBtn').forEach(b=>b.onclick=()=>showRegister(b.dataset.role)); document.querySelectorAll('.loginRoleBtn').forEach(b=>b.onclick=()=>showLogin(b.dataset.role));
   document.querySelectorAll('.navBtn').forEach(b=>b.onclick=()=>setView(b.dataset.view)); document.querySelectorAll('.mobileTab').forEach(b=>b.onclick=()=>setView(b.dataset.view)); document.querySelectorAll('.drawerTab').forEach(b=>b.onclick=()=>setView(b.dataset.view)); if($('hamburgerBtn')) $('hamburgerBtn').onclick=openMobileDrawer; if($('drawerClose')) $('drawerClose').onclick=closeMobileDrawer; if($('mobileMenuOverlay')) $('mobileMenuOverlay').onclick=closeMobileDrawer;
   $('registerForm').onsubmit=registerUser; $('loginForm').onsubmit=loginUser; $('logoutBtn').onclick=logout; $('taskForm').onsubmit=saveTask; $('createTaskBtn').onclick=saveTask; $('updateForm').onsubmit=saveUpdate; $('questionForm').onsubmit=saveQuestion; $('replyForm').onsubmit=saveReply; $('closeReply').onclick=closeReply;
-  $('chatForm').onsubmit=e=>{e.preventDefault();sendChat('common',$('chatText').value)}; $('mChatForm').onsubmit=e=>{e.preventDefault();sendChat('manager',$('mChatText').value)}; if($('assignTaskForm')) $('assignTaskForm').onsubmit=assignTaskToMember; if($('announcementForm')) $('announcementForm').onsubmit=postAnnouncement;
+  $('chatForm').onsubmit=e=>{e.preventDefault();sendChat('common',$('chatText').value)}; $('mChatForm').onsubmit=e=>{e.preventDefault();sendChat('manager',$('mChatText').value)}; if($('clearCommonChatBtn')) $('clearCommonChatBtn').onclick=()=>clearChatRoom('common'); if($('clearManagerChatBtn')) $('clearManagerChatBtn').onclick=()=>clearChatRoom('manager'); if($('assignTaskForm')) $('assignTaskForm').onsubmit=assignTaskToMember; if($('announcementForm')) $('announcementForm').onsubmit=postAnnouncement;
   if($('enableNotificationsBtn')) $('enableNotificationsBtn').onclick=requestBrowserNotifications; if($('downloadMySheetsBtn')) $('downloadMySheetsBtn').onclick=downloadMyGoogleSheet; if($('downloadMyPdfBtn')) $('downloadMyPdfBtn').onclick=downloadMyPdf; if($('downloadAllSheetsBtn')) $('downloadAllSheetsBtn').onclick=downloadAllGoogleSheet; if($('downloadAllPdfBtn')) $('downloadAllPdfBtn').onclick=downloadAllPdf; $('exportBtn').onclick=exportJSON; if($('resetDataTabBtn')) $('resetDataTabBtn').onclick=resetData;
   ['search','memberFilter','statusFilter'].forEach(id=>$(id).addEventListener('input',render)); ['personalSearch','personalStatusFilter','managerTaskFilter','managerMemberSearch'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('input',render); if(el) el.addEventListener('change',render); });
 }
